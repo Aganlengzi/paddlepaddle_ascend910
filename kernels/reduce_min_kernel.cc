@@ -20,7 +20,7 @@ namespace custom_kernel {
 template <typename T, typename Context>
 void MinRawKernel(const Context& dev_ctx, const phi::DenseTensor& x,
                   const std::vector<int64_t>& axes, bool keep_dim,
-                  bool reduce_all, phi::DenseTensorMeta::DataType out_dtype,
+                  bool reduce_all,
                   phi::DenseTensor* out) {
   phi::DenseTensor cast_out;
   auto dims = axes;
@@ -28,10 +28,6 @@ void MinRawKernel(const Context& dev_ctx, const phi::DenseTensor& x,
   dev_ctx.template Alloc<T>(&cast_out);
 
   auto cast_out_dtype = x.dtype();
-  if (out_dtype != phi::DenseTensorMeta::DataType::UNDEFINED) {
-    cast_out_dtype = out_dtype;
-  }
-
   if (x.dtype() != cast_out_dtype) {
     if (cast_out_dtype == phi::DenseTensorMeta::DataType::FLOAT32) {
       dev_ctx.template Alloc<float>(out);
@@ -93,10 +89,10 @@ void MinRawKernel(const Context& dev_ctx, const phi::DenseTensor& x,
 template <typename T, typename Context>
 void MinKernel(const Context& dev_ctx, const phi::DenseTensor& x,
                const std::vector<int64_t>& dims,
-               phi::DenseTensorMeta::DataType out_dtype, bool keep_dim,
+               bool keep_dim,
                phi::DenseTensor* out) {
   bool reduce_all = false;
-  custom_kernel::MinRawKernel<T>(dev_ctx, x, dims, keep_dim, reduce_all, out_dtype, out);
+  custom_kernel::MinRawKernel<T>(dev_ctx, x, dims, keep_dim, reduce_all, out);
 }
 
 }  // namespace custom_kernel

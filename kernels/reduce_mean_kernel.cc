@@ -95,8 +95,9 @@ template <typename T, typename Context>
 void MeanGradKernel(const Context& dev_ctx, const phi::DenseTensor& x,
                       const phi::DenseTensor& out_grad,
                       const std::vector<int64_t>& dims, bool keep_dim,
+                      bool reduce_all, phi::DataType in_dtype, phi::DataType out_dtype,
                       phi::DenseTensor* out) {
-  bool reduce_all = false;
+  //bool reduce_all = false;
   custom_kernel::MeanRawGradKernel<T>(dev_ctx, x, out_grad, dims, keep_dim, reduce_all, out);
 }
 
