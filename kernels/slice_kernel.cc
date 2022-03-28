@@ -46,14 +46,17 @@ void UpdateAttr(const phi::DDim& in_dims, const std::vector<int> axes,
 namespace custom_kernel {
 
 template <typename T, typename Context>
-void SliceKernel(const Context& dev_ctx, const phi::DenseTensor& x,
-                 const phi::ScalarArray& axes_array,
+void SliceKernel(const Context& dev_ctx,
+                 const phi::DenseTensor& x,
+                 const std::vector<int64_t>& axes_in,
                  const phi::ScalarArray& starts_array,
-                 const phi::ScalarArray& ends_array, phi::DenseTensor* out) {
-  auto axes_int = axes_array.GetData();
+                 const phi::ScalarArray& ends_array,
+                 const std::vector<int64_t>& infer_flags,
+                 const std::vector<int64_t>& decrease_axis,
+                 phi::DenseTensor* out) {
   auto starts_int = starts_array.GetData();
   auto ends_int = ends_array.GetData();
-  std::vector<int> axes(axes_int.begin(), axes_int.end());
+  std::vector<int> axes(axes_in.begin(), axes_in.end());
   std::vector<int> starts(starts_int.begin(), starts_int.end());
   std::vector<int> ends(ends_int.begin(), ends_int.end());
 
@@ -124,17 +127,19 @@ void SliceKernel(const Context& dev_ctx, const phi::DenseTensor& x,
 }
 
 template <typename T, typename Context>
-void SliceGradKernel(const Context& dev_ctx, const phi::DenseTensor& x,
+void SliceGradKernel(const Context& dev_ctx,
+                     const phi::DenseTensor& x,
                      const phi::DenseTensor& out_grad,
-                     const phi::ScalarArray& axes_array,
+                     const std::vector<int64_t>& axes_in,
                      const phi::ScalarArray& starts_array,
                      const phi::ScalarArray& ends_array,
+                     const std::vector<int64_t>& infer_flags,
+                     const std::vector<int64_t>& decrease_axis,
                      phi::DenseTensor* x_grad) {
-  auto axes_int = axes_array.GetData();
   auto starts_int = starts_array.GetData();
   auto ends_int = ends_array.GetData();
 
-  std::vector<int> axes(axes_int.begin(), axes_int.end());
+  std::vector<int> axes(axes_in.begin(), axes_in.end());
   std::vector<int> starts(starts_int.begin(), starts_int.end());
   std::vector<int> ends(ends_int.begin(), ends_int.end());
 
