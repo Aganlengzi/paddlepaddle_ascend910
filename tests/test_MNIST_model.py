@@ -78,7 +78,7 @@ mnist = MNIST()
 adam = Adam(learning_rate=0.001, parameters=mnist.parameters())
  
 # 设置全部样本的训练次数
-epoch_num = 5
+epoch_num = 1
 # 执行epoch_num次训练
 for epoch in range(epoch_num):
     # 读取训练数据进行训练
