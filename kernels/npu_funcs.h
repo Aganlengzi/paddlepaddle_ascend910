@@ -43,7 +43,12 @@ inline void TensorCopy(const Context& dev_ctx,
           << dst_place_;
 
   dst->Resize(src.dims());
-  auto dst_ptr = dst->mutable_data(dst_place_, src.dtype());
+  void* dst_ptr = nullptr;
+  if (dst_place_.GetType() != phi::AllocationType::CPU) {
+    dst_ptr = dev_ctx.Alloc(dst, src.dtype());
+  } else {
+    dst_ptr = dev_ctx.HostAlloc(dst, src.dtype());
+  }
 
   if (src_ptr == dst_ptr) {
     VLOG(3) << "Skip copy the same data async from " << src_place << " to "
@@ -91,7 +96,7 @@ inline void TensorCopy(const Context& dev_ctx,
  * CPU -> NPU
 */
 template <typename T>
-inline void TensorFromVector(const std::vector<T>& src,
+inline void TensorFromVector(const phi::CustomContext& ctx, const std::vector<T>& src,
                       const phi::CustomContext& dev_ctx, phi::DenseTensor* dst) {
   auto dst_place = dev_ctx.GetPlace();
   auto src_ptr = static_cast<const void*>(src.data());
@@ -110,7 +115,7 @@ inline void TensorFromVector(const std::vector<T>& src,
 }
 
 template <>
-inline void TensorFromVector<bool>(const std::vector<bool>& src,
+inline void TensorFromVector<bool>(const phi::CustomContext& ctx,const std::vector<bool>& src,
                       const phi::CustomContext& dev_ctx, phi::DenseTensor* dst) {
   auto dst_place = dev_ctx.GetPlace();
   PADDLE_THROW(phi::errors::Unimplemented(
@@ -119,23 +124,20 @@ inline void TensorFromVector<bool>(const std::vector<bool>& src,
 
 /**
  * CPU -> CPU
- * CPU -> NPU
 */
 template <typename T>
-inline void TensorFromVector(const std::vector<T>& src,
+inline void TensorFromVector(const phi::CustomContext& ctx, const std::vector<T>& src,
                       const phi::CPUContext& dev_ctx, phi::DenseTensor* dst) {
   auto dst_place = dev_ctx.GetPlace();
   auto src_ptr = static_cast<const void*>(src.data());
-  auto dst_ptr = dst->mutable_data<T>({src.size()}, dst_place);
+  dst->Resize({src.size()});
+  auto dst_ptr = ctx.template HostAlloc<T>(dst);
   auto size = src.size() * sizeof(T);
   if (UNLIKELY(size == 0)) return;
 
   if (dst_place.GetType() == phi::AllocationType::CPU) {
     VLOG(4) << "src_ptr: " << src_ptr << ", dst_ptr: " << dst_ptr << ", size: " << size;
     std::memcpy(dst_ptr, src_ptr, size);
-  }
-  else if (dst_place.GetType() == phi::AllocationType::CUSTOM) {
-    MemCpyH2D(nullptr, dst_ptr, src_ptr, size);
   }
   else {
     PADDLE_THROW(phi::errors::Unimplemented(
@@ -144,7 +146,7 @@ inline void TensorFromVector(const std::vector<T>& src,
 }
 
 template <>
-inline void TensorFromVector<bool>(const std::vector<bool>& src,
+inline void TensorFromVector<bool>(const phi::CustomContext& ctx, const std::vector<bool>& src,
                       const phi::CPUContext& dev_ctx, phi::DenseTensor* dst) {
   auto dst_place = dev_ctx.GetPlace();
   PADDLE_THROW(phi::errors::Unimplemented(
@@ -158,7 +160,7 @@ template <typename T>
 inline void FillNpuTensorWithConstant(phi::DenseTensor *dst, const phi::CustomContext& dev_ctx, T val) {
   int numel = dst->numel();
   std::vector<T> src(numel, static_cast<T>(val));
-  TensorFromVector(src, dev_ctx, dst);
+  TensorFromVector(dev_ctx, src, dev_ctx, dst);
 }
 
 // src - broadcast -> transformed_src

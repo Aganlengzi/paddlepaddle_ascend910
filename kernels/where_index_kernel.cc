@@ -44,7 +44,6 @@ void WhereIndexKernel(const Context& dev_ctx,
 
     phi::DenseTensor casted_cond;
     auto dst_dtype = ConvertToNpuDtype(phi::DataType::INT64);
-    // casted_cond.mutable_data<int64_t>(dims, place);
     casted_cond.Resize(dims);
     dev_ctx.template Alloc<int64_t>(&casted_cond);
     const auto& cast_runner =
@@ -62,7 +61,7 @@ void WhereIndexKernel(const Context& dev_ctx,
     for (int i = 0; i < dims.size(); ++i) {
       axes_vec.push_back(i);
     }
-    custom_kernel::TensorFromVector(axes_vec, dev_ctx, &cond_axes);
+    custom_kernel::TensorFromVector(dev_ctx, axes_vec, dev_ctx, &cond_axes);
     const auto& sum_runner =
         NpuOpRunner("ReduceSum", {casted_cond, cond_axes}, {sumed_true_num},
                     {{"keep_dims", false}});

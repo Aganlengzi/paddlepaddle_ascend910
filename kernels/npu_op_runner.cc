@@ -204,9 +204,10 @@ NpuOpRunner &NpuOpRunner::AddInput(const phi::DenseTensor &tensor, aclMemType me
   return *this;
 }
 
-NpuOpRunner &NpuOpRunner::AddInput(std::vector<int32_t> &&dims) {
+
+NpuOpRunner &NpuOpRunner::AddInput(const phi::CustomContext& dev_ctx, std::vector<int32_t> &&dims) {
   phi::DenseTensor host_tensor;
-  custom_kernel::TensorFromVector(dims, phi::CPUContext(), &host_tensor);
+  custom_kernel::TensorFromVector(dev_ctx, dims, phi::CPUContext(), &host_tensor);
   host_tensors_.emplace_back(host_tensor);
 
   // create aclTensorDesc
@@ -217,9 +218,9 @@ NpuOpRunner &NpuOpRunner::AddInput(std::vector<int32_t> &&dims) {
   return *this;
 }
 
-NpuOpRunner &NpuOpRunner::AddInput(std::vector<int64_t> &&dims) {
+NpuOpRunner &NpuOpRunner::AddInput(const phi::CustomContext& dev_ctx, std::vector<int64_t> &&dims) {
   phi::DenseTensor host_tensor;
-  custom_kernel::TensorFromVector(dims, phi::CPUContext(), &host_tensor);
+  custom_kernel::TensorFromVector(dev_ctx, dims, phi::CPUContext(), &host_tensor);
   host_tensors_.emplace_back(host_tensor);
 
   // create aclTensorDesc
@@ -230,22 +231,22 @@ NpuOpRunner &NpuOpRunner::AddInput(std::vector<int64_t> &&dims) {
   return *this;
 }
 
-NpuOpRunner &NpuOpRunner::AddInput(std::vector<float> &&values) {
+NpuOpRunner &NpuOpRunner::AddInput(const phi::CustomContext& dev_ctx, std::vector<float> &&values) {
   phi::DenseTensor host_tensor;
-  custom_kernel::TensorFromVector(values, phi::CPUContext(), &host_tensor);
+  custom_kernel::TensorFromVector(dev_ctx, values, phi::CPUContext(), &host_tensor);
   host_tensors_.emplace_back(host_tensor);
 
   // create aclTensorDesc
   input_descs_.emplace_back(CreateTensorDesc(host_tensor, ACL_MEMTYPE_HOST));
-  // create aclDataBuffer
+  // create aclDataBuffer*
   input_buffers_.emplace_back(CreateDataBuffer(host_tensor));
 
   return *this;
 }
 
-NpuOpRunner &NpuOpRunner::AddInput(std::vector<double> &&values) {
+NpuOpRunner &NpuOpRunner::AddInput(const phi::CustomContext& dev_ctx, std::vector<double> &&values) {
   phi::DenseTensor host_tensor;
-  custom_kernel::TensorFromVector(values, phi::CPUContext(), &host_tensor);
+  custom_kernel::TensorFromVector(dev_ctx, values, phi::CPUContext(), &host_tensor);
   host_tensors_.emplace_back(host_tensor);
 
   // create aclTensorDesc

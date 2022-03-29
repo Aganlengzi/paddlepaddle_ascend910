@@ -1,10 +1,10 @@
 #include "paddle/phi/core/compat/op_utils.h"
 
 namespace phi {
-KernelSignature MomentOpArgumentMapping(
+KernelSignature MergedMomentOpArgumentMapping(
     const ArgumentMappingContext& ctx) {
   return KernelSignature(
-      "momentum", {"Param", "Grad", "Velocity", "LearningRate"},
+      "merged_momentum", {"Param", "Grad", "Velocity", "LearningRate"},
       {"mu", "use_nesterov", "regularization_method", "regularization_coeff",
        "multi_precision", "rescale_grad"},
       {"ParamOut", "VelocityOut"});
@@ -12,5 +12,5 @@ KernelSignature MomentOpArgumentMapping(
 
 }  // namespace phi
 
-PD_REGISTER_ARG_MAPPING_FN(momentum, phi::MomentOpArgumentMapping);
+PD_REGISTER_ARG_MAPPING_FN(merged_momentum, phi::MergedMomentOpArgumentMapping);
 

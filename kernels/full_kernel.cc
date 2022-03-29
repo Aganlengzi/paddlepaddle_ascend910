@@ -43,7 +43,7 @@ void FullKernel(const Context& dev_ctx, const phi::ScalarArray& shape,
         .Run(stream);
 #else
     runner.SetType("Fill")
-        .AddInput(std::vector<int64_t>(shape_vec))
+        .AddInput(dev_ctx, std::vector<int64_t>(shape_vec))
         .AddInput(tensor_value)
         .AddOutput(*out)
         .Run(stream);
@@ -60,7 +60,7 @@ void FullKernel(const Context& dev_ctx, const phi::ScalarArray& shape,
 
         NpuOpRunner runner;
         runner.SetType("Fill")
-            .AddInput(std::vector<int64_t>(shape_vec))
+            .AddInput(dev_ctx, std::vector<int64_t>(shape_vec))
             .AddInput(tensor_value)
             .AddOutput(outputs[0])
             .Run(dev_ctx.stream());
@@ -80,7 +80,6 @@ using CommonType = typename std::common_type<
       float,
       typename std::conditional<std::is_same<T, phi::dtype::float16>::value,
                                 float, T>::type>::type;
-    // out->mutable_data<T>(context.GetPlace());
     dev_ctx.template Alloc<T>(out);
     auto value = val.to<float>();
 
@@ -106,7 +105,6 @@ using CommonType = typename std::common_type<
 
     phi::DenseTensor tensor_tmp(dtype);
     tensor_tmp.Resize({1});
-    // tensor_tmp.mutable_data<T>({1}, context.GetPlace());
     FillNpuTensorWithConstant<T>(&tensor_tmp, dev_ctx, static_cast<T>(value));
 
     auto stream = dev_ctx.stream();
@@ -114,7 +112,7 @@ using CommonType = typename std::common_type<
     auto shape = out->dims();
     NpuOpRunner runner;
     runner.SetType("Fill")
-        .AddInput(phi::vectorize(shape))
+        .AddInput(dev_ctx, phi::vectorize(shape))
         .AddInput(tensor_tmp)
         .AddOutput(*out)
         .Run(stream);

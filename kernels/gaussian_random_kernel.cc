@@ -30,7 +30,7 @@ void GaussianRandomKernel(const Context& ctx,
 
     phi::DenseTensor cpu_tensor(out->dtype());
     cpu_tensor.Resize(out->dims());
-    T* cpu_data = cpu_tensor.mutable_data<T>(phi::CPUPlace());
+    T* cpu_data = ctx.template HostAlloc<T>(&cpu_tensor);
     std::normal_distribution<T> dist(mean, std);
 
     int64_t size = out->numel();

@@ -58,7 +58,6 @@ void AdamKernel(const Context& dev_ctx,
   //   skip_update = skip_update_vec[0];
   // }
   // skip_update=true, just copy input to output, and TensorCopy will call
-  // mutable_data
   // if (skip_update) {
   //   VLOG(4) << "Adam skip update";
   //   TensorCopy(

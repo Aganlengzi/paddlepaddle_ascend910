@@ -48,14 +48,11 @@ void TopkKernel(const Context& dev_ctx,
     out->Resize(output_dims);
     indices->Resize(output_dims);
 
-    // out->mutable_data<T>(context.GetPlace());
     dev_ctx.template Alloc<T>(out);
-    // indices->mutable_data<int64_t>(context.GetPlace());
     dev_ctx.template Alloc<int64_t>(indices);
 
     phi::DenseTensor indices_int32(paddle::experimental::DataType::INT32);
     indices_int32.Resize(output_dims);
-    // indices_int32.mutable_data<int32_t>(context.GetPlace());
     dev_ctx.template Alloc<int32_t>(&indices_int32);
 
     auto npu_stream = dev_ctx.stream();
@@ -63,7 +60,7 @@ void TopkKernel(const Context& dev_ctx,
     NpuOpRunner npu_op_runner_topkv2;
     npu_op_runner_topkv2.SetType("TopKV2")
         .AddInput(x)
-        .AddInput(std::vector<int32_t>{k})
+        .AddInput(dev_ctx, std::vector<int32_t>{k})
         .AddOutput(*out)
         .AddOutput(indices_int32)
         .AddAttr("sorted", sorted)

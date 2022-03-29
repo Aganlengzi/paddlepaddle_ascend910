@@ -41,7 +41,6 @@ void AccuracyRawKernel(const Context& dev_ctx,
       if (indices.dtype() != paddle::experimental::DataType::INT32) {
         cast_indices.Resize(indices.dims());
         dev_ctx.template Alloc<int>(&cast_indices);
-        //cast_indices.mutable_data<int>(ctx.GetPlace());
         const auto& runner_cast_indices =
             NpuOpRunner("Cast", {indices}, {cast_indices},
                         {{"dst_type", static_cast<int>(dst_dtype)}});
@@ -51,7 +50,6 @@ void AccuracyRawKernel(const Context& dev_ctx,
       }
       if (label.dtype() != paddle::experimental::DataType::INT32) {
         cast_label.Resize(label.dims());
-        //cast_label.mutable_data<int>(ctx.GetPlace());
         dev_ctx.template Alloc<int>(&cast_label);
         const auto& runner_cast_label =
             NpuOpRunner("Cast", {label}, {cast_label},
@@ -68,7 +66,6 @@ void AccuracyRawKernel(const Context& dev_ctx,
     // equal
     phi::DenseTensor tmp_equal(paddle::experimental::DataType::BOOL);
     tmp_equal.Resize(out.dims());
-    // tmp_equal.mutable_data<bool>(ctx.GetPlace());
     dev_ctx.template Alloc<bool>(&tmp_equal);
     const auto& runner_equal =
         NpuOpRunner("Equal", {cast_indices, cast_label}, {tmp_equal}, {});
@@ -78,7 +75,6 @@ void AccuracyRawKernel(const Context& dev_ctx,
     phi::DenseTensor tmp_equal_cast(paddle::experimental::DataType::FLOAT32);
     tmp_equal_cast.Resize(out.dims());
     dev_ctx.template Alloc<float>(&tmp_equal_cast);
-    // tmp_equal_cast.mutable_data<float>(ctx.GetPlace());
     const auto& runner_cast_equal = NpuOpRunner(
         "Cast", {tmp_equal}, {tmp_equal_cast},
         {{"dst_type",
@@ -89,7 +85,6 @@ void AccuracyRawKernel(const Context& dev_ctx,
     // reduce_max
     phi::DenseTensor tmp_correct_max(paddle::experimental::DataType::FLOAT32);
     tmp_correct_max.Resize(phi::make_ddim({num_samples}));
-    // tmp_correct_max.mutable_data<float>(ctx.GetPlace());
     dev_ctx.template Alloc<float>(&tmp_correct_max);
     const auto& runner_reduce_max =
         NpuOpRunner("ReduceMaxD", {tmp_equal_cast}, {tmp_correct_max},
@@ -99,7 +94,6 @@ void AccuracyRawKernel(const Context& dev_ctx,
     // reduce_sum
     phi::DenseTensor tmp_correct(paddle::experimental::DataType::FLOAT32);
     tmp_correct.Resize(correct->dims());
-    // tmp_correct.mutable_data<float>(ctx.GetPlace());
     dev_ctx.template Alloc<float>(&tmp_correct);
     const auto& runner_reduce_sum =
         NpuOpRunner("ReduceSumD", {tmp_correct_max}, {tmp_correct},
@@ -107,7 +101,6 @@ void AccuracyRawKernel(const Context& dev_ctx,
     runner_reduce_sum.Run(stream);
 
     // cast to int
-    // correct->mutable_data<int>(ctx.GetPlace());
     dev_ctx.template Alloc<int>(correct);
     const auto& runner_cast_correct = NpuOpRunner(
         "Cast", {tmp_correct}, {*correct},
@@ -115,20 +108,17 @@ void AccuracyRawKernel(const Context& dev_ctx,
     runner_cast_correct.Run(stream);
 
     // [total]
-    // total->mutable_data<int>(ctx.GetPlace());
     dev_ctx.template Alloc<int>(total);
     FillNpuTensorWithConstant<int>(total, dev_ctx, static_cast<int>(num_samples));
 
     // use `total` of type `float32` for calculating accuracy
     phi::DenseTensor tmp_total(paddle::experimental::DataType::FLOAT32);
     tmp_total.Resize(total->dims());
-    // tmp_total.mutable_data<float>(ctx.GetPlace());
     dev_ctx.template Alloc<float>(&tmp_total);
     FillNpuTensorWithConstant<float>(&tmp_total, dev_ctx,
                                      static_cast<float>(num_samples));
 
     // [accuracy]
-    // accuracy->mutable_data<float>(ctx.GetPlace());
     dev_ctx.template Alloc<float>(accuracy);
     const auto& runner_accuracy =
         NpuOpRunner("Div", {tmp_correct, tmp_total}, {*accuracy}, {});
@@ -139,3 +129,4 @@ void AccuracyRawKernel(const Context& dev_ctx,
 
 PD_REGISTER_PLUGIN_KERNEL(
     accuracy, Ascend910, ALL_LAYOUT, custom_kernel::AccuracyRawKernel, float, phi::dtype::float16, int, int64_t) {}
+

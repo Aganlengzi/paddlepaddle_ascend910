@@ -61,13 +61,13 @@ class NpuOpRunner {
 
   NpuOpRunner &AddInput(const phi::DenseTensor &tensor, aclMemType mem_type);
 
-  NpuOpRunner &AddInput(std::vector<int32_t> &&dims);
+  NpuOpRunner &AddInput(const phi::CustomContext& dev_ctx, std::vector<int32_t> &&dims);
 
-  NpuOpRunner &AddInput(std::vector<int64_t> &&dims);
+  NpuOpRunner &AddInput(const phi::CustomContext& dev_ctx, std::vector<int64_t> &&dims);
 
-  NpuOpRunner &AddInput(std::vector<float> &&values);
+  NpuOpRunner &AddInput(const phi::CustomContext& dev_ctx, std::vector<float> &&values);
 
-  NpuOpRunner &AddInput(std::vector<double> &&values);
+  NpuOpRunner &AddInput(const phi::CustomContext& dev_ctx, std::vector<double> &&values);
 
   NpuOpRunner &AddOutput(const phi::DenseTensor &tensor);
 
@@ -119,7 +119,7 @@ class NpuOpRunner {
             tmp_inputs[i].ShareDataWith(inputs[i]);
             } else {
             tmp_inputs[i].Resize(inputs[i].dims());
-            tmp_inputs[i].mutable_data(dev_ctx.GetPlace(), input_type[i]);
+            dev_ctx.Alloc(&(tmp_inputs[i]), input_type[i]);
 
             const auto &cast_runner = NpuOpRunner(
                 "Cast", {inputs[i]}, {tmp_inputs[i]},
@@ -135,8 +135,7 @@ class NpuOpRunner {
             tmp_outputs[i].ShareDataWith(outputs[i]);
             } else {
             tmp_outputs[i].Resize(outputs[i].dims());
-            tmp_outputs[i].mutable_data(
-                dev_ctx.GetPlace(), output_type[i]);
+            dev_ctx.Alloc(&(tmp_outputs[i]), output_type[i]);
             }
         }
 
@@ -169,4 +168,5 @@ class NpuOpRunner {
   std::vector<aclTensorDesc *> output_descs_;
   std::vector<phi::DenseTensor> host_tensors_;
   aclopAttr *attr_{nullptr};
+  phi::CustomContext *dev_ctx_{nullptr};
 };

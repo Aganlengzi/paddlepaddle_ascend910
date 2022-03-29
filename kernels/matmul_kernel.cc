@@ -165,7 +165,7 @@ void MatmulKernel(const Context& dev_ctx,
       NpuOpRunner runner_brd;
       runner_brd.SetType("BroadcastTo")
           .AddInput(x_temp)
-          .AddInput(std::move(x_broadcast_dims))
+          .AddInput(dev_ctx, std::move(x_broadcast_dims))
           .AddOutput(x_temp_brd)
           .Run(stream);
     }
@@ -180,7 +180,7 @@ void MatmulKernel(const Context& dev_ctx,
       NpuOpRunner runner_brd;
       runner_brd.SetType("BroadcastTo")
           .AddInput(y_temp)
-          .AddInput(std::move(y_broadcast_dims))
+          .AddInput(dev_ctx, std::move(y_broadcast_dims))
           .AddOutput(y_temp_brd)
           .Run(stream);
     }
@@ -213,7 +213,7 @@ void MatmulGradKernel(const Context& dev_ctx,
       NpuOpRunner runner;
       runner.SetType("BroadcastTo")
           .AddInput(dout)
-          .AddInput(std::move(x_dims))
+          .AddInput(dev_ctx, std::move(x_dims))
           .AddOutput(dout_temp)
           .Run(stream);
 
@@ -318,7 +318,7 @@ void MatmulGradKernel(const Context& dev_ctx,
       NpuOpRunner runner_brd;
       runner_brd.SetType("BroadcastTo")
           .AddInput(x_temp)
-          .AddInput(std::move(x_broadcast_dims))
+          .AddInput(dev_ctx, std::move(x_broadcast_dims))
           .AddOutput(x_temp_brd)
           .Run(stream);
     }
@@ -333,7 +333,7 @@ void MatmulGradKernel(const Context& dev_ctx,
       NpuOpRunner runner_brd;
       runner_brd.SetType("BroadcastTo")
           .AddInput(y_temp)
-          .AddInput(std::move(y_broadcast_dims))
+          .AddInput(dev_ctx, std::move(y_broadcast_dims))
           .AddOutput(y_temp_brd)
           .Run(stream);
     }

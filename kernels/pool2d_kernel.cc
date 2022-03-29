@@ -140,13 +140,12 @@ void Pool2dKernel(const Context& dev_ctx,
       // AdaptiveAvgPool2d only support NCHW
       phi::DenseTensor transformed_input, transformed_output;
       if (pooling_type == "avg" && channel_last) {
-        transformed_input.mutable_data<T>(
-            phi::make_dim(in_x_dims[0], in_x_dims[3], in_x_dims[1],
-                          in_x_dims[2]),
-            dev_ctx.GetPlace());
-        transformed_output.mutable_data<T>(
-            phi::make_dim(out_dims[0], out_dims[3], out_dims[1], out_dims[2]),
-            dev_ctx.GetPlace());
+        transformed_input.Resize(phi::make_dim(in_x_dims[0], in_x_dims[3], in_x_dims[1],
+                                               in_x_dims[2]));
+        dev_ctx.template Alloc<T>(&transformed_input);
+        transformed_output.Resize(phi::make_dim(out_dims[0], out_dims[3], out_dims[1],
+                                                out_dims[2]));
+        dev_ctx.template Alloc<T>(&transformed_output);
 
         const auto &trans_runner =
             NpuOpRunner("TransData", {in_x_tensor}, {transformed_input},
@@ -323,7 +322,7 @@ void Pool2dGradKernel(const Context& dev_ctx,
 
       NpuOpRunner runner;
       runner.SetType("AvgPoolV2Grad");
-      runner.AddInput(phi::vectorize<int>(in_x.dims()));
+      runner.AddInput(dev_ctx, phi::vectorize<int>(in_x.dims()));
       runner.AddInput(out_grad_tensor);
       runner.AddOutput(in_x_grad_tensor);
       runner.AddAttrs(attrs);

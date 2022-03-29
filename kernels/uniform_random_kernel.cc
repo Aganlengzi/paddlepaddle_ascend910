@@ -52,7 +52,7 @@ void UniformRandomRawKernel(const Context& dev_ctx,
   // 1. CPU implement
   phi::DenseTensor cpu_out(out->dtype());
   cpu_out.Resize(out->dims());
-  T *cpu_data = cpu_out.mutable_data<T>(phi::CPUPlace());
+  T *cpu_data = dev_ctx.template HostAlloc<T>(&cpu_out);
 
   std::shared_ptr<std::mt19937_64> engine;
   if (seed) {

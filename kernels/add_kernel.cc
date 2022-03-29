@@ -76,7 +76,6 @@ void AddGradKernel(const Context& dev_ctx,
     axis = (axis == -1 ? std::abs(x.dims().size() - y.dims().size()) : axis);
     auto stream = dev_ctx.stream();
     if (dx) {
-      // dx->mutable_data<T>(ctx.GetPlace());
       dev_ctx.template Alloc<T>(dx);
       if (dx->dims() != dout.dims()) {
         std::vector<int> dst_dims_vec;
@@ -107,7 +106,6 @@ void AddGradKernel(const Context& dev_ctx,
       }
     }
     if (dy) {
-      // dy->mutable_data<T>(ctx.GetPlace());
       dev_ctx.template Alloc<T>(dy);
       if (dy->dims() != dout.dims()) {
         std::vector<int> dst_dims_vec;

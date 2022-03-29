@@ -26,7 +26,7 @@ static void TranposeNPU(const phi::CustomContext& dev_ctx,
   NpuOpRunner runner;
   runner.SetType("Transpose")
       .AddInput(in)
-      .AddInput(std::move(*perm))
+      .AddInput(dev_ctx, std::move(*perm))
       .AddOutput(*out)
       .Run(stream);
 }

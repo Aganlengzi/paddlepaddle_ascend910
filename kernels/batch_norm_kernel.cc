@@ -231,7 +231,7 @@ void BatchNormInferKernel(const Context& dev_ctx,
             " But got X's shape = [%s], X's dimension = [%d].",
             x_dims.to_str(), x_dims.size()));
 
-    y->mutable_data<T>(dev_ctx.GetPlace());
+    dev_ctx.template Alloc<T>(y);
 
     phi::DenseTensor x_tensor;
     phi::DenseTensor y_tesnor;
