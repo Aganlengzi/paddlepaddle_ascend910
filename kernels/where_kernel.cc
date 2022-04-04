@@ -51,8 +51,12 @@ void WhereGradKernel(const Context& ctx,
 
     auto stream = ctx.stream();
 
-    phi::DenseTensor tensor_zeros(out_grad.dtype());
-    tensor_zeros.Resize(out_grad.dims());
+    //phi::DenseTensor tensor_zeros(out_grad.dtype());
+    //tensor_zeros.Resize(out_grad.dims());
+    phi::DenseTensor tensor_zeros;
+    phi::DenseTensorMeta meta = {out_grad.dtype(), out_grad.dims()};
+    tensor_zeros.set_meta(meta);
+
     ctx.template Alloc<T>(&tensor_zeros);
 
     const auto& runner =

@@ -67,12 +67,23 @@ void SoftmaxWithCrossEntropyKernel(const Context& dev_ctx,
     dev_ctx.template Alloc<T>(softmax);
 
     phi::DenseTensor logits_2d, labels_1d, loss_1d, backprop_2d, softmax_2d;
-    logits_2d.ShareDataWith(logits).Resize({n, d});
-    labels_1d.ShareDataWith(labels).Resize({n});
-    loss_1d.ShareDataWith(*loss).Resize({n});
-    backprop_2d.ShareDataWith(*backprop).Resize({n, d});
-    softmax_2d.ShareDataWith(*softmax).Resize({n, d});
+    //logits_2d.ShareDataWith(logits).Resize({n, d});
+    //labels_1d.ShareDataWith(labels).Resize({n});
+    //loss_1d.ShareDataWith(*loss).Resize({n});
+    //backprop_2d.ShareDataWith(*backprop).Resize({n, d});
+    //softmax_2d.ShareDataWith(*softmax).Resize({n, d});
 
+    logits_2d = logits;
+    logits_2d .Resize({n, d});
+    labels_1d = labels;
+    labels_1d.Resize({n});
+    loss_1d = *loss;
+    loss_1d.Resize({n});
+    backprop_2d = *backprop;
+    backprop_2d.Resize({n, d});
+    softmax_2d = *softmax;
+    softmax_2d.Resize({n, d});
+    
     auto stream = dev_ctx.stream();
 
     std::vector<int> axes;
@@ -114,10 +125,17 @@ void SoftmaxWithCrossEntropyGradKernel(const Context& dev_ctx,
 
     phi::DenseTensor logits_grad_2d, loss_grad_1d, backprop_2d;
 
-    logits_grad_2d.ShareDataWith(*logits_grad).Resize({n, d});
-    loss_grad_1d.ShareDataWith(loss_grad).Resize({n});
-    backprop_2d.ShareDataWith(backprop).Resize({n, d});
+    //logits_grad_2d.ShareDataWith(*logits_grad).Resize({n, d});
+    //loss_grad_1d.ShareDataWith(loss_grad).Resize({n});
+    //backprop_2d.ShareDataWith(backprop).Resize({n, d});
 
+    logits_grad_2d = *logits_grad;
+    logits_grad_2d.Resize({n, d});
+    loss_grad_1d = loss_grad;
+    loss_grad_1d.Resize({n});
+    backprop_2d = backprop;
+    backprop_2d.Resize({n, d});
+    
     auto stream = dev_ctx.stream();
     const auto& runner_mul =
         NpuOpRunner("Mul", {loss_grad, backprop}, {*logits_grad}, {});

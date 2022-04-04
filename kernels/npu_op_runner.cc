@@ -366,8 +366,8 @@ aclTensorDesc *NpuOpRunner::CreateTensorDesc(phi::DenseTensor tensor,
 
 aclDataBuffer *NpuOpRunner::CreateDataBuffer(phi::DenseTensor tensor) {
   void *ptr = tensor.data();
-  VLOG(4) << "NPU ptr: " << ptr << ", size: " << tensor.memory_size();
-  auto *buffer = aclCreateDataBuffer(ptr, tensor.memory_size());
+  VLOG(4) << "NPU ptr: " << ptr << ", size: " << tensor.capacity(); // memory_size
+  auto *buffer = aclCreateDataBuffer(ptr, tensor.capacity()); // memory_size
   PADDLE_ENFORCE_NOT_NULL(
       buffer, phi::errors::External("Call aclCreateDataBuffer failed."));
   return buffer;

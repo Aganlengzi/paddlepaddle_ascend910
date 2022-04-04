@@ -53,12 +53,16 @@ void BatchNormKernel(const Context& dev_ctx,
 
     dev_ctx.template Alloc<T>(y);
 
-    phi::DenseTensor x_tensor, y_tesnor;
-    x_tensor.ShareDataWith(x);
-    y_tesnor.ShareDataWith(*y);
+    phi::DenseTensor x_tensor(x), y_tesnor(*y);
+    //x_tensor.ShareDataWith(x);
+    //y_tesnor.ShareDataWith(*y);
     if (data_layout == phi::DataLayout::kNHWC) {
-      x_tensor.set_layout(phi::DataLayout::kNHWC);
-      y_tesnor.set_layout(phi::DataLayout::kNHWC);
+      //x_tensor.set_layout(phi::DataLayout::kNHWC);
+      //y_tesnor.set_layout(phi::DataLayout::kNHWC);
+      phi::DenseTensorMeta meta_1 = {x.dtype(), x.dims(), phi::DataLayout::kNHWC}; 
+      phi::DenseTensorMeta meta_2 = {y->dtype(), y->dims(), phi::DataLayout::kNHWC}; 
+      x_tensor.set_meta(meta_1);
+      y_tesnor.set_meta(meta_2);
     }
 
     auto stream = dev_ctx.stream();
@@ -130,12 +134,16 @@ void BatchNormGradKernel(const Context& dev_ctx,
 
     use_global_stats = is_test || use_global_stats;
 
-    phi::DenseTensor x_tensor, dy_tensor;
-    x_tensor.ShareDataWith(x);
-    dy_tensor.ShareDataWith(d_y);
+    phi::DenseTensor x_tensor(x), dy_tensor(d_y);
+    //x_tensor.ShareDataWith(x);
+    //dy_tensor.ShareDataWith(d_y);
     if (data_layout == phi::DataLayout::kNHWC) {
-      x_tensor.set_layout(phi::DataLayout::kNHWC);
-      dy_tensor.set_layout(phi::DataLayout::kNHWC);
+      //x_tensor.set_layout(phi::DataLayout::kNHWC);
+      //dy_tensor.set_layout(phi::DataLayout::kNHWC);
+      phi::DenseTensorMeta meta_1 = {x.dtype(), x.dims(), phi::DataLayout::kNHWC}; 
+      phi::DenseTensorMeta meta_2 = {d_y.dtype(), d_y.dims(), phi::DataLayout::kNHWC}; 
+      x_tensor.set_meta(meta_1);
+      dy_tensor.set_meta(meta_2);
     }
 
     phi::DenseTensor scale_grad_tmp, bias_grad_tmp;
@@ -174,10 +182,12 @@ void BatchNormGradKernel(const Context& dev_ctx,
     }
     if (d_x) {
       dev_ctx.template Alloc<T>(d_x);
-      phi::DenseTensor dx_tensor;
-      dx_tensor.ShareDataWith(*d_x);
+      phi::DenseTensor dx_tensor(*d_x);
+      //dx_tensor.ShareDataWith(*d_x);
       if (data_layout == phi::DataLayout::kNHWC) {
-        dx_tensor.set_layout(phi::DataLayout::kNHWC);
+        //dx_tensor.set_layout(phi::DataLayout::kNHWC);
+        phi::DenseTensorMeta meta_3 = {d_x->dtype(), d_x->dims(), phi::DataLayout::kNHWC}; 
+        dx_tensor.set_meta(meta_3);
       }
       if (use_global_stats) {
         if (x.dims().size() == 3) {
@@ -233,13 +243,17 @@ void BatchNormInferKernel(const Context& dev_ctx,
 
     dev_ctx.template Alloc<T>(y);
 
-    phi::DenseTensor x_tensor;
-    phi::DenseTensor y_tesnor;
-    x_tensor.ShareDataWith(x);
-    y_tesnor.ShareDataWith(*y);
+    phi::DenseTensor x_tensor(x);
+    phi::DenseTensor y_tesnor(*y);
+    //x_tensor.ShareDataWith(x);
+    //y_tesnor.ShareDataWith(*y);
     if (data_layout == phi::DataLayout::kNHWC) {
-      x_tensor.set_layout(phi::DataLayout::kNHWC);
-      y_tesnor.set_layout(phi::DataLayout::kNHWC);
+      //x_tensor.set_layout(phi::DataLayout::kNHWC);
+      //y_tesnor.set_layout(phi::DataLayout::kNHWC);
+      phi::DenseTensorMeta meta_4 = {x.dtype(), x.dims(), phi::DataLayout::kNHWC}; 
+      phi::DenseTensorMeta meta_5 = {y->dtype(), y->dims(), phi::DataLayout::kNHWC}; 
+      x_tensor.set_meta(meta_4);
+      y_tesnor.set_meta(meta_5);
     }
 
     auto stream = dev_ctx.stream();

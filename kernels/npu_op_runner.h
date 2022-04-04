@@ -116,7 +116,8 @@ class NpuOpRunner {
                 (input_type[i] == paddle::experimental::DataType::UNDEFINED ||
                 input_type[i] != inputs[i].dtype());
             if (!cast_input) {
-            tmp_inputs[i].ShareDataWith(inputs[i]);
+            //tmp_inputs[i].ShareDataWith(inputs[i]);
+            tmp_inputs[i] = inputs[i];
             } else {
             tmp_inputs[i].Resize(inputs[i].dims());
             dev_ctx.Alloc(&(tmp_inputs[i]), input_type[i]);
@@ -132,7 +133,8 @@ class NpuOpRunner {
                 (output_type[i] == paddle::experimental::DataType::UNDEFINED ||
                 output_type[i] != outputs[i].dtype());
             if (!cast_output) {
-            tmp_outputs[i].ShareDataWith(outputs[i]);
+            //tmp_outputs[i].ShareDataWith(outputs[i]);
+            tmp_outputs[i] = outputs[i];
             } else {
             tmp_outputs[i].Resize(outputs[i].dims());
             dev_ctx.Alloc(&(tmp_outputs[i]), output_type[i]);

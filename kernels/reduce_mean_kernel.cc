@@ -83,7 +83,8 @@ void MeanRawGradKernel(const Context& dev_ctx, const phi::DenseTensor& x,
   for (auto d : reduce_dims) {
     tmp_output_dims_vec[d] = 1;
   }
-  tmp_out_grad.ShareDataWith(out_grad);
+  //tmp_out_grad.ShareDataWith(out_grad);
+  tmp_out_grad = out_grad;
   tmp_out_grad.Resize(phi::make_ddim(tmp_output_dims_vec));
   NpuElementWiseOpBroadcast<T>(dev_ctx, x_grad, &tmp_out_grad, 0,
                                &transformed_x_grad, &transformed_out_grad);

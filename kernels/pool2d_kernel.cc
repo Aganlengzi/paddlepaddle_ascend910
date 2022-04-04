@@ -95,9 +95,9 @@ void Pool2dKernel(const Context& dev_ctx,
     phi::DDim data_dims;
     phi::DDim out_data_dims;
 
-    phi::DenseTensor in_x_tensor, out_tensor;
-    in_x_tensor.ShareDataWith(in_x);
-    out_tensor.ShareDataWith(*out);
+    phi::DenseTensor in_x_tensor(in_x), out_tensor(*out);
+    //in_x_tensor.ShareDataWith(in_x);
+    //out_tensor.ShareDataWith(*out);
     std::vector<int> ksize_vec(4, 1);
     std::vector<int> strides_vec(4, 1);
 
@@ -108,8 +108,12 @@ void Pool2dKernel(const Context& dev_ctx,
       ksize_vec[2] = ksize[1];
       strides_vec[1] = strides[0];
       strides_vec[2] = strides[1];
-      in_x_tensor.set_layout(phi::DataLayout::kNHWC);
-      out_tensor.set_layout(phi::DataLayout::kNHWC);
+      //in_x_tensor.set_layout(phi::DataLayout::kNHWC);
+      //out_tensor.set_layout(phi::DataLayout::kNHWC);
+      phi::DenseTensorMeta meta_1 = {in_x_tensor.dtype(), in_x_tensor.dims(), phi::DataLayout::kNHWC};
+      phi::DenseTensorMeta meta_2 = {out_tensor.dtype(), out_tensor.dims(), phi::DataLayout::kNHWC};
+      in_x_tensor.set_meta(meta_1);
+      out_tensor.set_meta(meta_2);
     } else {
       data_dims = phi::slice_ddim(in_x_dims, 2, in_x_dims.size());
       out_data_dims = phi::slice_ddim(out_dims, 2, out_dims.size());
@@ -153,8 +157,10 @@ void Pool2dKernel(const Context& dev_ctx,
                          {"dst_format", std::string("NCHW")}});
         trans_runner.Run(dev_ctx.stream());
       } else {
-        transformed_input.ShareDataWith(in_x_tensor);
-        transformed_output.ShareDataWith(out_tensor);
+        //transformed_input.ShareDataWith(in_x_tensor);
+        //transformed_output.ShareDataWith(out_tensor);
+        transformed_input = in_x_tensor;
+        transformed_output = out_tensor;
       }
 
       const auto &runner =
@@ -225,11 +231,11 @@ void Pool2dGradKernel(const Context& dev_ctx,
     std::vector<int> ksize_vec(4, 1);
     std::vector<int> strides_vec(4, 1);
 
-    phi::DenseTensor in_x_tensor, out_tensor, out_grad_tensor, in_x_grad_tensor;
-    in_x_tensor.ShareDataWith(in_x);
-    out_tensor.ShareDataWith(out);
-    out_grad_tensor.ShareDataWith(out_grad);
-    in_x_grad_tensor.ShareDataWith(*in_x_grad);
+    phi::DenseTensor in_x_tensor(in_x), out_tensor(out), out_grad_tensor(out_grad), in_x_grad_tensor(*in_x_grad);
+    //in_x_tensor.ShareDataWith(in_x);
+    //out_tensor.ShareDataWith(out);
+    //out_grad_tensor.ShareDataWith(out_grad);
+    //in_x_grad_tensor.ShareDataWith(*in_x_grad);
     if (channel_last) {
       data_dims = phi::slice_ddim(in_x_dims, 1, in_x_dims.size() - 1);
       out_data_dims = phi::slice_ddim(out_dims, 1, out_dims.size() - 1);
@@ -237,10 +243,18 @@ void Pool2dGradKernel(const Context& dev_ctx,
       ksize_vec[2] = ksize[1];
       strides_vec[1] = strides[0];
       strides_vec[2] = strides[1];
-      in_x_tensor.set_layout(phi::DataLayout::kNHWC);
-      out_tensor.set_layout(phi::DataLayout::kNHWC);
-      out_grad_tensor.set_layout(phi::DataLayout::kNHWC);
-      in_x_grad_tensor.set_layout(phi::DataLayout::kNHWC);
+      // in_x_tensor.set_layout(phi::DataLayout::kNHWC);
+      // out_tensor.set_layout(phi::DataLayout::kNHWC);
+      // out_grad_tensor.set_layout(phi::DataLayout::kNHWC);
+      // in_x_grad_tensor.set_layout(phi::DataLayout::kNHWC);
+      phi::DenseTensorMeta meta_1 = {in_x_tensor.dtype(), in_x_tensor.dims(), phi::DataLayout::kNHWC};
+      phi::DenseTensorMeta meta_2 = {out_tensor.dtype(), out_tensor.dims(), phi::DataLayout::kNHWC};
+      phi::DenseTensorMeta meta_3 = {out_grad_tensor.dtype(), out_grad_tensor.dims(), phi::DataLayout::kNHWC};
+      phi::DenseTensorMeta meta_4 = {in_x_grad_tensor.dtype(), in_x_grad_tensor.dims(), phi::DataLayout::kNHWC};
+      in_x_tensor.set_meta(meta_1);
+      out_tensor.set_meta(meta_2);
+      out_grad_tensor.set_meta(meta_3);
+      in_x_grad_tensor.set_meta(meta_4);
     } else {
       data_dims = phi::slice_ddim(in_x_dims, 2, in_x_dims.size());
       out_data_dims = phi::slice_ddim(out_dims, 2, out_dims.size());

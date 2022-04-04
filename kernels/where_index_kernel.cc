@@ -39,7 +39,8 @@ void WhereIndexKernel(const Context& dev_ctx,
                       {{"dst_type", static_cast<int32_t>(bool_type)}});
       booled_runner.Run(stream, true);
     } else {
-      booled_cond.ShareDataWith(condition);
+      //booled_cond.ShareDataWith(condition);
+      booled_cond = condition;
     }
 
     phi::DenseTensor casted_cond;
@@ -78,7 +79,9 @@ void WhereIndexKernel(const Context& dev_ctx,
       return;
     }
 
-    out->set_layout(paddle::experimental::DataLayout::kAnyLayout);
+    //out->set_layout(paddle::experimental::DataLayout::kAnyLayout);
+    phi::DenseTensorMeta meta = {out->dtype(), out->dims(), paddle::experimental::DataLayout::kAnyLayout};
+    out->set_meta(meta);
     NpuOpRunner runner{"Where", {condition}, {*out}};
     runner.Run(stream);
 }

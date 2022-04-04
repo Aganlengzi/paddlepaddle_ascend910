@@ -46,8 +46,10 @@ void SumRawKernel(const Context& dev_ctx, const phi::DenseTensor& x,
         "Cast", {x}, {cast_x}, {{"dst_type", static_cast<int>(ACL_FLOAT)}});
     runner_cast.Run(stream);
   } else {
-    cast_x.ShareDataWith(x);
-    cast_out.ShareDataWith(*out);
+    //cast_x.ShareDataWith(x);
+    //cast_out.ShareDataWith(*out);
+    cast_x = x;
+    cast_out = *out;
   }
 
   if (reduce_all) {

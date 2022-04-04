@@ -20,7 +20,7 @@
 namespace custom_kernel {
 
 template <typename T, typename Context>
-void FullKernel(const Context& dev_ctx, const phi::ScalarArray& shape,
+void FullKernel(const Context& dev_ctx, const phi::IntArray& shape,
                  const phi::Scalar& val, phi::DenseTensorMeta::DataType dtype,
                  phi::DenseTensor* out) {
   auto shape_vec = shape.GetData();
@@ -103,8 +103,12 @@ using CommonType = typename std::common_type<
         std::isnan(value), false,
         phi::errors::InvalidArgument("The filled value is NaN."));
 
-    phi::DenseTensor tensor_tmp(dtype);
-    tensor_tmp.Resize({1});
+    //phi::DenseTensor tensor_tmp(dtype);
+    //tensor_tmp.Resize({1});
+    phi::DenseTensor tensor_tmp;
+    phi::DenseTensorMeta meta = {dtype, {1}};
+    tensor_tmp.set_meta(meta);
+
     FillNpuTensorWithConstant<T>(&tensor_tmp, dev_ctx, static_cast<T>(value));
 
     auto stream = dev_ctx.stream();

@@ -144,7 +144,8 @@ void MergedMomentumKernel(const Context& dev_ctx, const std::vector<const phi::D
                                           {regularized_grad}, {});
         runner2.Run(dev_ctx.stream());
       } else {
-        regularized_grad.ShareDataWith(*grad);
+        //regularized_grad.ShareDataWith(*grad);
+        regularized_grad = *grad;
       }
       TensorCopy(dev_ctx, *param, false, param_out);
       TensorCopy(dev_ctx, *velocity, false, velocity_out);
@@ -159,6 +160,6 @@ void MergedMomentumKernel(const Context& dev_ctx, const std::vector<const phi::D
 
 }  // namespace custom_kernel
 
-PD_REGISTER_PLUGIN_KERNEL(merged_momentum, Ascend910, ALL_LAYOUT,
-                          custom_kernel::MergedMomentumKernel, phi::dtype::float16,
-                          float, double) {}
+//PD_REGISTER_PLUGIN_KERNEL(merged_momentum, Ascend910, ALL_LAYOUT,
+//                          custom_kernel::MergedMomentumKernel, phi::dtype::float16,
+//                          float, double) {}

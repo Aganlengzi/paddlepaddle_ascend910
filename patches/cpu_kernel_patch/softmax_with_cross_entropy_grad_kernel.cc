@@ -1,7 +1,7 @@
 #include "paddle/phi/kernels/softmax_with_cross_entropy_grad_kernel.h"
 
 #include "paddle/phi/backends/cpu/cpu_context.h"
-#include "paddle/phi/common/scalar_array.h"
+#include "paddle/phi/common/int_array.h"
 #include "paddle/phi/core/kernel_registry.h"
 
 namespace phi {

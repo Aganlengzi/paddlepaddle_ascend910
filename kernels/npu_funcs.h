@@ -172,8 +172,8 @@ inline void NpuBroadcast(const Context& dev_ctx, const phi::DenseTensor* src,
 
   // 1. expand the axis with dim 1
   auto src_dims = src->dims();
-  phi::DenseTensor tmp_src;
-  tmp_src.ShareDataWith(*src);
+  phi::DenseTensor tmp_src(*src);
+  //tmp_src.ShareDataWith(*src);
   tmp_src.Resize(src_dims);
   for (int i = 0; i < src_dims.size(); ++i) {
     if (src_dims[i] == 1 && dst_dims[i + axis] > 1) {
@@ -187,7 +187,8 @@ inline void NpuBroadcast(const Context& dev_ctx, const phi::DenseTensor* src,
                       {{"axis", static_cast<int64_t>(i)},
                        {"tiles", static_cast<int64_t>(dst_dims[i + axis])}});
       runner.Run(stream);
-      tmp_src.ShareDataWith(tmp_tensor);
+      //tmp_src.ShareDataWith(tmp_tensor);
+      tmp_src = tmp_tensor;
       tmp_src.Resize(tmp_tensor_dims);
     }
   }
@@ -203,7 +204,8 @@ inline void NpuBroadcast(const Context& dev_ctx, const phi::DenseTensor* src,
         NpuOpRunner("ExpandD", {tmp_src}, {tmp_tensor},
                     {{"shape", phi::vectorize<int64_t>(tmp_tensor_dims)}});
     runner.Run(stream);
-    tmp_src.ShareDataWith(tmp_tensor);
+    //tmp_src.ShareDataWith(tmp_tensor);
+    tmp_src = tmp_tensor;
     tmp_src.Resize(tmp_tensor_dims);
   } else {
     tmp_src.Resize(phi::slice_ddim(dst_dims, 0, axis + src_dims.size()));
@@ -225,7 +227,8 @@ inline void NpuBroadcast(const Context& dev_ctx, const phi::DenseTensor* src,
                     {{"axis", static_cast<int64_t>(axis + src_dims.size())},
                      {"tiles", static_cast<int64_t>(post)}});
     runner.Run(stream);
-    tmp_src.ShareDataWith(tmp_tensor);
+    //tmp_src.ShareDataWith(tmp_tensor);
+    tmp_src = tmp_tensor;
   }
   tmp_src.Resize(dst_dims);
   TensorCopy(dev_ctx, tmp_src, false, transformed_src);

@@ -19,7 +19,7 @@ namespace custom_kernel {
 
 template <typename T, typename Context>
 void GaussianRandomKernel(const Context& ctx,
-                          const phi::ScalarArray& shape,
+                          const phi::IntArray& shape,
                           float mean,
                           float std,
                           int seed,
@@ -28,8 +28,12 @@ void GaussianRandomKernel(const Context& ctx,
 
     ctx.template Alloc<T>(out);
 
-    phi::DenseTensor cpu_tensor(out->dtype());
-    cpu_tensor.Resize(out->dims());
+    //phi::DenseTensor cpu_tensor(out->dtype());
+    //cpu_tensor.Resize(out->dims());
+    phi::DenseTensor cpu_tensor;
+    phi::DenseTensorMeta meta = {out->dtype(), out->dims()};
+    cpu_tensor.set_meta(meta);
+
     T* cpu_data = ctx.template HostAlloc<T>(&cpu_tensor);
     std::normal_distribution<T> dist(mean, std);
 

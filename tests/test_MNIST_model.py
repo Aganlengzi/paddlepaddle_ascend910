@@ -25,7 +25,7 @@ class MnistDataset(paddle.vision.datasets.MNIST):
         img = np.reshape(self.images[idx], [1, 28, 28])
         img = img / 255.0 * 2.0 - 1.0
         if self.return_label:
-            return img, np.array(self.labels[idx]).astype('float32')
+            return img, np.array(self.labels[idx]).astype('int')
         return img,
     def __len__(self):
         return len(self.images)

@@ -93,8 +93,8 @@ void AddGradKernel(const Context& dev_ctx,
           }
         }
         if (!reduce_axes.empty()) {
-          phi::DenseTensor tmp;
-          tmp.ShareDataWith(*dx);
+          phi::DenseTensor tmp(*dx);
+          //tmp.ShareDataWith(*dx);
           tmp.Resize(phi::make_ddim(dst_dims_vec));
           const auto& runner =
               NpuOpRunner("ReduceSumD", {dout}, {tmp},
@@ -123,8 +123,8 @@ void AddGradKernel(const Context& dev_ctx,
           }
         }
         if (!reduce_axes.empty()) {
-          phi::DenseTensor tmp;
-          tmp.ShareDataWith(*dy);
+          phi::DenseTensor tmp(*dy);
+          //tmp.ShareDataWith(*dy);
           tmp.Resize(phi::make_ddim(dst_dims_vec));
           const auto& runner =
               NpuOpRunner("ReduceSumD", {dout}, {tmp},

@@ -51,8 +51,12 @@ void TopkKernel(const Context& dev_ctx,
     dev_ctx.template Alloc<T>(out);
     dev_ctx.template Alloc<int64_t>(indices);
 
-    phi::DenseTensor indices_int32(paddle::experimental::DataType::INT32);
-    indices_int32.Resize(output_dims);
+    //phi::DenseTensor indices_int32(paddle::experimental::DataType::INT32);
+    //indices_int32.Resize(output_dims);
+    phi::DenseTensor indices_int32;
+    phi::DenseTensorMeta meta = {phi::DataType::INT32, output_dims};
+    indices_int32.set_meta(meta);
+
     dev_ctx.template Alloc<int32_t>(&indices_int32);
 
     auto npu_stream = dev_ctx.stream();
@@ -70,7 +74,7 @@ void TopkKernel(const Context& dev_ctx,
 
     // Cast 'indices_int32' to 'indices', from INT32 to INT64
     auto dst_dtype =
-        ConvertToNpuDtype(indices->type());
+        ConvertToNpuDtype(indices->dtype());
     const auto& npu_op_runner_cast =
         NpuOpRunner("Cast", {indices_int32}, {*indices},
                     {{"dst_type", static_cast<int>(dst_dtype)}});

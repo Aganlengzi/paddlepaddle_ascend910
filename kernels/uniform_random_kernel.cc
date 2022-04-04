@@ -26,6 +26,7 @@ inline void UniformRealDistribution(T *data,
                                     const float &min,
                                     const float &max,
                                     std::shared_ptr<std::mt19937_64> engine) {
+  LOG(WARNING) << "#### data: " << data; 
   std::uniform_real_distribution<T> dist(static_cast<T>(min),
                                          static_cast<T>(max));
   for (int64_t i = 0; i < size; ++i) {
@@ -35,7 +36,7 @@ inline void UniformRealDistribution(T *data,
 
 template <typename T, typename Context>
 void UniformRandomRawKernel(const Context& dev_ctx,
-                            const phi::ScalarArray& shape,
+                            const phi::IntArray& shape,
                             phi::DataType dtype,
                             float min,
                             float max,
@@ -50,9 +51,30 @@ void UniformRandomRawKernel(const Context& dev_ctx,
   auto size = out->numel();
 
   // 1. CPU implement
-  phi::DenseTensor cpu_out(out->dtype());
-  cpu_out.Resize(out->dims());
-  T *cpu_data = dev_ctx.template HostAlloc<T>(&cpu_out);
+  // phi::DenseTensor cpu_out(out->dtype());
+  // cpu_out.Resize(out->dims());
+  
+  // auto meta = cpu_out.meta();
+  // LOG(WARNING) << "#### meta.is_scalar: " << meta.is_scalar;
+  // LOG(WARNING) << "#### meta.dims: " << meta.dims;
+  // LOG(WARNING) << "#### meta.dtype: " << meta.dtype;
+  // LOG(WARNING) << "#### meta.layout: " << meta.layout;
+  // // LOG(WARNING) << "#### meta.lod: " << meta.lod;
+  // LOG(WARNING) << "#### meta.offset: " << meta.offset;
+
+  phi::DenseTensor cpu_out1;
+  phi::DenseTensorMeta meta_in = {out->dtype(), out->dims()};
+  cpu_out1.set_meta(meta_in);
+
+  auto meta1 = cpu_out1.meta();
+  LOG(WARNING) << "#### meta.is_scalar: " << meta1.is_scalar;
+  LOG(WARNING) << "#### meta.dims: " << meta1.dims;
+  LOG(WARNING) << "#### meta.dtype: " << meta1.dtype;
+  LOG(WARNING) << "#### meta.layout: " << meta1.layout;
+  // LOG(WARNING) << "#### meta.lod: " << meta1.lod;
+  LOG(WARNING) << "#### meta.offset: " << meta1.offset;
+
+  T *cpu_data = dev_ctx.template HostAlloc<T>(&cpu_out1);
 
   std::shared_ptr<std::mt19937_64> engine;
   if (seed) {
@@ -61,7 +83,7 @@ void UniformRandomRawKernel(const Context& dev_ctx,
   } else {
     engine = dev_ctx.GetGenerator()->GetCPUEngine();
   }
-  UniformRealDistribution<T>(cpu_data, size, min, max, engine);
+  custom_kernel::UniformRealDistribution<T>(cpu_data, size, min, max, engine);
   if (diag_num > 0) {
     PADDLE_ENFORCE_GT(
         size,
@@ -81,12 +103,12 @@ void UniformRandomRawKernel(const Context& dev_ctx,
   }
 
   // 2. CPU Copy to NPU
-  TensorCopy(dev_ctx, cpu_out, true, out);
+  TensorCopy(dev_ctx, cpu_out1, true, out);
 }
 
 template <typename T, typename Context>
 void UniformRandomKernel(const Context& dev_ctx,
-                         const phi::ScalarArray& shape,
+                         const phi::IntArray& shape,
                          phi::DataType dtype,
                          float min,
                          float max,
@@ -99,8 +121,8 @@ void UniformRandomKernel(const Context& dev_ctx,
 }  // namespace custom_kernel 
 
 PD_REGISTER_PLUGIN_KERNEL(
-    uniform_random_raw, Ascend910, ALL_LAYOUT, custom_kernel::UniformRandomRawKernel, float) {}
+   uniform_random_raw, Ascend910, ALL_LAYOUT, custom_kernel::UniformRandomRawKernel, float) {}
 
 PD_REGISTER_PLUGIN_KERNEL(
-    uniform_random, Ascend910, ALL_LAYOUT, custom_kernel::UniformRandomKernel, float) {}
+   uniform_random, Ascend910, ALL_LAYOUT, custom_kernel::UniformRandomKernel, float) {}
 
